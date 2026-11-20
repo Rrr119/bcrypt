@@ -1,0 +1,17 @@
+{
+  "root": "/home/dev/feedback/uid28689",
+  "B": "/home/dev/feedback/uid28689",
+  "sha": "b5f3090c9294eed213b7087edc33e5bbc58ced83",
+  "wslDistro": "Ubuntu-26.04",
+  "source": {
+    "owner": "pyca",
+    "repo": "bcrypt",
+    "sha": "b5f3090c9294eed213b7087edc33e5bbc58ced83"
+  },
+  "fork": {
+    "owner": "Rrr119",
+    "repo": "bcrypt",
+    "cloneUrl": "https://github.com/Rrr119/bcrypt.git"
+  },
+  "at": "2026-11-20T00:18:55.701Z"
+}

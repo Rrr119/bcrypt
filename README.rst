@@ -132,11 +132,63 @@ encode it to prevent NULL byte problems before hashing the result with
 
 .. code:: pycon
 
+    >>> import base64
+    >>> import hashlib
     >>> password = b"an incredibly long password" * 10
-    >>> hashed = bcrypt.hashpw(
-    ...     base64.b64encode(hashlib.sha256(password).digest()),
-    ...     bcrypt.gensalt()
+    >>> hashed = bcrypt.hashpw(password, bcrypt.gensalt(), prehash=True)
+
+``bcrypt.prehash_password(password)`` exposes the same SHA-256 plus standard
+Base64 construction directly. ``checkpw`` automatically tries this construction
+for long passwords:
+
+.. code:: pycon
+
+    >>> bcrypt.checkpw(password, hashed)
+    True
+
+For callers that need to control the behavior, pass ``prehash=True`` to require
+pre-hashing or ``legacy_truncate=False`` to reject a hash that only matches the
+first 72 bytes of a long password.
+
+
+Verifying and Upgrading Legacy Hashes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``$2a$``, ``$2b$``, ``$2x$``, and ``$2y$`` hashes can all be verified. Legacy
+hashes created with bcrypt's historical 72-byte truncation continue to verify
+for long passwords so that accounts keep working during a migration.
+
+Use ``checkpw_and_upgrade`` after a successful login to atomically verify the
+password and generate a ``$2b$`` hash when the version or cost is out of date:
+
+.. code:: pycon
+
+    >>> verified, new_hash = bcrypt.checkpw_and_upgrade(
+    ...     password, stored_hash, rounds=12
     ... )
+    >>> if verified and new_hash is not None:
+    ...     # Persist new_hash; the password is now upgraded.
+    ...     ...
+
+``needs_update`` can be used to inspect a hash without verifying a password.
+``upgrade_hash`` and ``migrate_hash`` return the upgraded hash, or ``None`` if
+the password does not verify.
+
+
+Migrating Hashes in Bulk
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``bcrypt.migrate`` module upgrades newline-delimited JSON records while the
+plaintext password is available (for example, during login):
+
+.. code:: console
+
+    $ python -m bcrypt.migrate users.jsonl --rounds 12 --output upgraded.jsonl
+
+Each input line contains an ``id``, a ``hash``, and either a UTF-8
+``password`` or a Base64 encoded ``password_b64``. The output contains the same
+``id``, a ``status`` of ``upgraded``, ``unchanged``, or ``invalid``, and the
+current hash. Passwords are never written to the output.
 
 Compatibility
 -------------

@@ -8,6 +8,12 @@ Unreleased
 * Dropped support for Python 3.8.
 * Dropped support for free-threaded Python 3.13 (free-threaded Python 3.14 is
   still supported).
+* Added SHA-256 pre-hashing for passwords longer than 72 bytes via
+  ``hashpw(..., prehash=True)`` and ``prehash_password``.
+* Added legacy ``$2a$``/``$2y$`` verification compatibility for long passwords,
+  plus ``needs_update``, ``checkpw_and_upgrade``, ``upgrade_hash``, and
+  ``migrate_hash``.
+* Added the ``python -m bcrypt.migrate`` JSONL migration tool.
 
 5.0.0
 -----
